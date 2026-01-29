@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechStaX Webhook Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --bg-light: #f8fafc;
+            --bg-dark: #0f172a;
+            --surface-light: #ffffff;
+            --surface-dark: #1e293b;
+            --text-light: #1e293b;
+            --text-dark: #f1f5f9;
+            --border-light: #e2e8f0;
+            --border-dark: #334155;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-light);
+            line-height: 1.6;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark-mode {
+            background: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .theme-toggle {
+            background: var(--surface-light);
+            border: 2px solid var(--border-light);
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        body.dark-mode .theme-toggle {
+            background: var(--surface-dark);
+            border-color: var(--border-dark);
+            color: var(--text-dark);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--surface-light);
+            border: 1px solid var(--border-light);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+            border-color: var(--primary);
+        }
+
+        body.dark-mode .stat-card {
+            background: var(--surface-dark);
+            border-color: var(--border-dark);
+        }
+
+        .stat-card .number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-card .label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-top: 5px;
+        }
+
+        .event-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .event-item {
+            background: var(--surface-light);
+            border-left: 4px solid var(--primary);
+            padding: 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .event-item:hover {
+            transform: translateX(4px);
+            box-shadow: var(--shadow);
+        }
+
+        body.dark-mode .event-item {
+            background: var(--surface-dark);
+            border-color: var(--secondary);
+        }
+
+        .event-item.push {
+            border-left-color: #10b981;
+        }
+
+        .event-item.pull-request {
+            border-left-color: #3b82f6;
+        }
+
+        .event-item.merge {
+            border-left-color: #f59e0b;
+        }
+
+        .event-icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 10px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .event-item.push .event-icon {
+            background: #10b981;
+        }
+
+        .event-item.pull-request .event-icon {
+            background: #3b82f6;
+        }
+
+        .event-item.merge .event-icon {
+            background: #f59e0b;
+        }
+
+        .event-message {
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+        }
+
+        .event-message strong {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .event-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        .branch-badge {
+            background: var(--bg-light);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+        }
+
+        body.dark-mode .branch-badge {
+            background: var(--surface-light);
+            color: var(--text-light);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: #94a3b8;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid var(--border-light);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .timestamp {
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .event-details {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 TechStaX Dashboard</h1>
+        <button class="theme-toggle" id="theme-btn" title="Toggle dark mode">🌙</button>
+    </div>
+
+    <div class="container">
+        <div class="stats">
+            <div class="stat-card">
+                <div class="number" id="push-count">0</div>
+                <div class="label">Pushes</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="pr-count">0</div>
+                <div class="label">Pull Requests</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="merge-count">0</div>
+                <div class="label">Merges</div>
+            </div>
+        </div>
+
+        <ul class="event-list" id="event-list">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading events...</p>
+            </div>
+        </ul>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeBtn = document.getElementById('theme-btn');
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+
+        if (isDarkMode) {
+            document.body.classList.add('dark-mode');
+            themeBtn.textContent = '☀️';
+        }
+
+        themeBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const isNow = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isNow);
+            themeBtn.textContent = isNow ? '☀️' : '🌙';
+        });
+
+        // Event Statistics
+        let stats = { push: 0, pr: 0, merge: 0 };
+
+        function getEventType(action) {
+            if (action === 'PUSH') return 'push';
+            if (action === 'PULL_REQUEST') return 'pull-request';
+            if (action === 'MERGE') return 'merge';
+            return 'unknown';
+        }
+
+        function getEventIcon(action) {
+            if (action === 'PUSH') return '↑';
+            if (action === 'PULL_REQUEST') return '⎇';
+            if (action === 'MERGE') return '✓';
+            return '•';
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function fetchEvents() {
+            fetch('/events')
+                .then(response => response.json())
+                .then(data => {
+                    const list = document.getElementById('event-list');
+                    list.innerHTML = '';
+
+                    if (!data || data.length === 0) {
+                        list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>No events yet. Push some code!</p></div>';
+                        return;
+                    }
+
+                    stats = { push: 0, pr: 0, merge: 0 };
+
+                    data.forEach(event => {
+                        const eventType = getEventType(event.action);
+                        if (eventType === 'push') stats.push++;
+                        else if (eventType === 'pull-request') stats.pr++;
+                        else if (eventType === 'merge') stats.merge++;
+
+                        const li = document.createElement('li');
+                        li.className = `event-item ${eventType}`;
+                        const icon = getEventIcon(event.action);
+
+                        let message = '';
+                        let details = '';
+
+                        if (event.action === 'PUSH') {
+                            message = `<strong>${event.author}</strong> pushed to <strong>${event.to_branch}</strong>`;
+                            details = `<span class="branch-badge">→ ${event.to_branch}</span>`;
+                        } else if (event.action === 'PULL_REQUEST') {
+                            message = `<strong>${event.author}</strong> opened a pull request`;
+                            details = `<span class="branch-badge">from ${event.from_branch}</span><span class="branch-badge">to ${event.to_branch}</span>`;
+                        } else if (event.action === 'MERGE') {
+                            message = `<strong>${event.author}</strong> merged branches`;
+                            details = `<span class="branch-badge">${event.from_branch} → ${event.to_branch}</span>`;
+                        }
+
+                        li.innerHTML = `
+                            <div class="event-message">
+                                <span class="event-icon">${icon}</span>${message}
+                            </div>
+                            <div class="event-details">
+                                ${details}
+                                <span class="timestamp">${formatDate(event.timestamp)}</span>
+                            </div>
+                        `;
+                        list.appendChild(li);
+                    });
+
+                    // Update stats
+                    document.getElementById('push-count').textContent = stats.push;
+                    document.getElementById('pr-count').textContent = stats.pr;
+                    document.getElementById('merge-count').textContent = stats.merge;
+                });
+        }
+
+        // Initial fetch
+        fetchEvents();
+
+        // Poll every 15 seconds
+        setInterval(fetchEvents, 15000);
+    </script>
+</body>
+</html>
