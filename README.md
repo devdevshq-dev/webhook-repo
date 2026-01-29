@@ -14,27 +14,22 @@ The application follows the flow described in the assessment :
 
 1. **Trigger:** `action-repo` (GitHub) sends a webhook payload on Push, PR, or Merge.
 2. **Receiver:** `webhook-repo` (Flask) accepts the JSON payload at `/webhook`.
-3. 
-**Storage:** Data is parsed and stored in **MongoDB** according to the required schema.
+3. **Storage:** Data is parsed and stored in **MongoDB** according to the required schema.
 
 
-4. 
-**Frontend:** A minimal UI polls the database every **15 seconds** to fetch and display the latest changes.
+4. **Frontend:** A minimal UI polls the database every **15 seconds** to fetch and display the latest changes.
 
 
 
 ## 🛠️ Tech Stack
 
-* 
-**Backend:** Python (Flask) 
+* **Backend:** Python (Flask) 
 
 
-* 
-**Database:** MongoDB 
+* **Database:** MongoDB 
 
 
-* 
-**Frontend:** HTML5, JavaScript (Fetch API for polling) 
+* **Frontend:** HTML5, JavaScript (Fetch API for polling) 
 
 
 * **Tools:** ngrok (for local webhook testing)
@@ -119,16 +114,13 @@ GitHub does not have a dedicated `merge` event type. As per the requirement to c
 
 1. Open the dashboard at `http://localhost:5000`.
 2. Trigger events in your `action-repo`:
-* 
-**Push Code:** UI displays `{author} pushed to {branch}`.
+* **Push Code:** UI displays `{author} pushed to {branch}`.
 
 
-* 
-**Open PR:** UI displays `{author} submitted a pull request...`.
+* **Open PR:** UI displays `{author} submitted a pull request...`.
 
 
-* 
-**Merge PR:** UI displays `{author} merged branch...`.
+* **Merge PR:** UI displays `{author} merged branch...`.
 
 
 
